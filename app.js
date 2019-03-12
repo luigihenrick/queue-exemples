@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true})); 
-var sendMessage = (message, res) => {};
+var channel, queue, sendMessage;
 
 app.get('/rate', (req, res) => {
   res.sendFile('public/index.html', { root: __dirname });
@@ -17,7 +17,6 @@ app.get('/rate', (req, res) => {
 
 app.post('/api/rate', function(req, res) {
   var mensagem = JSON.stringify(req.body);
-  console.log('Recebido post com mensagem: %s', mensagem);
   sendMessage(mensagem, res);
 });
 
@@ -27,22 +26,25 @@ app.listen(port, () => {
 
 amqp.connect(amqpUrl, (err, conn) => {
   conn.createChannel((err, ch) => {
-    ch.assertQueue('', { exclusive: true }, (err, q) => {
-      sendMessage = (message, res) => {
-        const corr = uuid();
-        console.log(` [x] Enviando mensagem: ${message}`);
-
-        ch.consume(q.queue, (msg) => {
-          if (msg.properties.correlationId === corr) {
-            console.log(` [.] Retorno: ${msg.content.toString()}`);
-            res.sendFile('public/thanks.html', { root: __dirname });
-          }
-        }, {noAck: true});
-
-        ch.sendToQueue('rpc_queue',
-          new Buffer(message.toString()),
-          { correlationId: corr, replyTo: q.queue });
-      }
+    channel = ch;
+    channel.assertQueue('', { exclusive: true }, (err, q) => {
+      queue = q.queue;
     });
   });
 });
+
+sendMessage = (message, res) => {
+  const corr = uuid();
+  console.log(` [x] Enviando mensagem: ${message}`);
+
+  channel.consume(queue, (msg) => {
+    if (msg.properties.correlationId === corr) {
+      console.log(` [.] Retorno: ${msg.content.toString()}`);
+      res.sendFile('public/thanks.html', { root: __dirname });
+    }
+  }, {noAck: true});
+
+  channel.sendToQueue('rpc_queue',
+    new Buffer(message.toString()),
+    { correlationId: corr, replyTo: queue });
+};
