@@ -1,0 +1,20 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app/rate-presentation.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.5.3",
+    "body-parser": "^1.17.2",
+    "dotenv": "^6.2.0",
+    "express": "^4.15.4",
+    "npm": "^6.8.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1"
+  }
+}

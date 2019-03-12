@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-Br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <title>Presentation Rate</title>
+</head>
+<body>
+    <div class="well">
+        <form action="/api/rate" method="post">
+          <div class="form-group">
+            <label for="firstname">Nome</label>
+            <input class="form-control" type="text" name="name">
+          </div>
+          <div class="form-group">
+            <label for="lastname">Comentario</label>
+            <input class="form-control" type="text" name="comment">
+          </div>
+          <div class="form-group">
+            <label>Avaliação</label>
+            <label class="checkbox-inline">
+                <input type="radio" name="rate" id="1" value="1">1*
+            </label>
+            <label class="checkbox-inline">
+                <input type="radio" name="rate" id="2" value="2">2*
+            </label>
+            <label class="checkbox-inline">
+                <input type="radio" name="rate" id="3" value="3">3*
+            </label>
+            <label class="checkbox-inline">
+                <input type="radio" name="rate" id="4" value="4">4*
+            </label>
+            <label class="checkbox-inline">
+                <input type="radio" name="rate" id="5" value="5">5*
+            </label>
+          </div>
+          <input type="submit" class="btn btn-primary" value="Submit">
+        </form>
+      </div>
+</body>
+</html>
