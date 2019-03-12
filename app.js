@@ -25,6 +25,7 @@ app.post('/api/rate', function(req, res) {
         ch.consume(q.queue, (msg) => {
           if (msg.properties.correlationId === corr) {
             console.log(` [.] Retorno: ${msg.content.toString()}`);
+            setTimeout(function() { conn.close(); }, 500);
             res.sendFile('public/thanks.html', { root: __dirname });
          }
         }, {noAck: true});
