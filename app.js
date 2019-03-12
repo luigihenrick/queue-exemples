@@ -9,7 +9,6 @@ const app = express();
 const port = process.env.PORT || 8080;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true})); 
-var channel, queue, sendMessage;
 
 app.get('/rate', (req, res) => {
   res.sendFile('public/index.html', { root: __dirname });
@@ -17,34 +16,28 @@ app.get('/rate', (req, res) => {
 
 app.post('/api/rate', function(req, res) {
   var mensagem = JSON.stringify(req.body);
-  sendMessage(mensagem, res);
+  
+  amqp.connect(amqpUrl, (err, conn) => {
+    conn.createChannel((err, ch) => {
+      ch.assertQueue('', { exclusive: true }, (err, q) => {
+        const corr = uuid();
+  
+        ch.consume(q.queue, (msg) => {
+          if (msg.properties.correlationId === corr) {
+            console.log(` [.] Retorno: ${msg.content.toString()}`);
+            res.sendFile('public/thanks.html', { root: __dirname });
+         }
+        }, {noAck: true});
+  
+        console.log(` [x] Enviando mensagem: ${mensagem}`);
+        ch.sendToQueue('rpc_queue',
+          new Buffer(mensagem.toString()),
+          { correlationId: corr, replyTo: q.queue });
+      });
+    });
+  });
 });
 
 app.listen(port, () => {
   console.log(' [x] Servidor iniciado na porta: %s', port);
 });
-
-amqp.connect(amqpUrl, (err, conn) => {
-  conn.createChannel((err, ch) => {
-    channel = ch;
-    channel.assertQueue('', { exclusive: true }, (err, q) => {
-      queue = q.queue;
-    });
-  });
-});
-
-sendMessage = (message, res) => {
-  const corr = uuid();
-  console.log(` [x] Enviando mensagem: ${message}`);
-
-  channel.consume(queue, (msg) => {
-    if (msg.properties.correlationId === corr) {
-      console.log(` [.] Retorno: ${msg.content.toString()}`);
-      res.sendFile('public/thanks.html', { root: __dirname });
-    }
-  }, {noAck: true});
-
-  channel.sendToQueue('rpc_queue',
-    new Buffer(message.toString()),
-    { correlationId: corr, replyTo: queue });
-};
