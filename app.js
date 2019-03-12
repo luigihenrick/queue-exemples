@@ -18,23 +18,16 @@ app.post('/api/rate', function(req, res) {
   var mensagem = JSON.stringify(req.body);
   
   amqp.connect(amqpUrl, (err, conn) => {
+
     conn.createChannel((err, ch) => {
-      ch.assertQueue('', { exclusive: true }, (err, q) => {
-        const corr = uuid();
+      var q = 'queue';
   
-        ch.consume(q.queue, (msg) => {
-          if (msg.properties.correlationId === corr) {
-            console.log(` [.] Retorno: ${msg.content.toString()}`);
-            setTimeout(function() { conn.close(); }, 500);
-            res.sendFile('public/thanks.html', { root: __dirname });
-         }
-        }, {noAck: true});
-  
-        console.log(` [x] Enviando mensagem: ${mensagem}`);
-        ch.sendToQueue('rpc_queue',
-          new Buffer(mensagem.toString()),
-          { correlationId: corr, replyTo: q.queue });
-      });
+      ch.assertQueue(q, {durable: false});
+      ch.sendToQueue(q, new Buffer(mensagem.toString()));
+      
+      console.log(` [x] Enviado: '${mensagem}'`);
+      setTimeout(function() { conn.close(); }, 500);
+      res.sendFile('public/thanks.html', { root: __dirname });
     });
   });
 });
