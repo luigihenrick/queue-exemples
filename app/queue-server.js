@@ -1,6 +1,6 @@
 const amqp = require('amqplib/callback_api');
 
-const amqpUrl = process.env.AMQP_URL || 'amqp://testes:Senhadificil1@localhost';
+const amqpUrl = process.env.AMQP_URL || 'amqp://localhost';
 
 amqp.connect(amqpUrl, (err, conn) => {
   conn.createChannel(function(err, ch) {

@@ -3,7 +3,7 @@ const amqp = require('amqplib/callback_api');
 const uuid = require('uuid');
 const express = require('express');
 const bodyParser = require('body-parser');
-const amqpUrl = process.env.AMQP_URL || 'amqp://testes:Senhadificil1@localhost';
+const amqpUrl = process.env.AMQP_URL || 'amqp://localhost';
 
 const app = express();
 const port = process.env.PORT || 8080;
